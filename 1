@@ -1,0 +1,70 @@
+# Citation
+# To cite landscapemetrics or acknowledge its use, please cite the following Software note, 
+# substituting the version of the application that you used for ‘v0.0’:
+# Hesselbarth, M.H.K., Sciaini, M., With, K.A., Wiegand, K., Nowosad, J. 2019. landscapemetrics: 
+# an open‐source R tool to calculate landscape metrics. Ecography, 42: 1648-1657 (v0.0).
+
+setwd("D:/5-onedrive data/OneDrive - 西湖大学/1_Project/2024/08-25 Landscape complexity")
+rm(list=ls())
+
+# Get the stable version from CRAN
+install.packages("landscapemetrics")
+
+library(landscapemetrics)
+library(terra)
+library(raster)
+
+#************************************************************************************************************************************************
+####叠层####
+###https://mp.weixin.qq.com/s/TaWAor_UftVzvhn8m3l_6Q###
+#************************************************************************************************************************************************
+CHIC_2005_H <- raster("1_data/Chickpea/CHIC_global_2005_H_SPAM.tif")
+COWP_2005_H <- raster("1_data/Cowpea/COWP_global_2005_H_SPAM.tif")
+LENT_2005_H <- raster("1_data/Lentil/LENT_global_2005_H_SPAM.tif")
+PIGE_2005_H <- raster("1_data/Pigeon pea/PIGE_global_2005_H_SPAM.tif")
+SOYB_2005_H <- raster("1_data/Soybean/SOYB_global_2005_H_SPAM.tif")
+
+CHIC_2005_H_pixel <- as(CHIC_2005_H, "SpatialPixelsDataFrame")
+CHIC_2005_H_pixel <- as.data.frame(CHIC_2005_H_pixel)
+
+
+Legume_2005 <- merge(CHIC_2005_H, COWP_2005_H, LENT_2005_H, PIGE_2005_H, SOYB_2005_H) # 合并栅格文件 ???
+
+Legume_2005_pixel <- as(Legume_2005, "SpatialPixelsDataFrame") #很关键的一步
+Legume_2005_pixel <- as.data.frame(Legume_2005_pixel) #将栅格数据转成可供ggplot2绘制的数据格式
+
+colnames(Legume_2005_pixel) <- c("value", "x", "y") # 赋值列名???
+
+library(ggplot2)
+#开始绘图
+land_use <- ggplot() +
+  geom_raster(data = Legume_2005_pixel , aes(x = x, y = y,fill = factor(value))) + 
+  scale_fill_manual(name = "Category",values = classcolor,labels = landclass) +
+  labs(x ='Longitude(E)',y="Latitude(N)",
+       title = "Raster data Charts Exercise",
+       subtitle = "land use data",
+       caption = 'Visualization by DataCharm')+
+  theme_bw()+
+  theme(text = element_text(family = "Times_New_Roman",face='bold'),
+        title = element_text(family = 'Times_New_Roman',size = 16,face = 'bold'),
+        axis.text = element_text(family = 'Times_New_Roman',size = 12,face = 'bold'),  
+        #修改刻度线内
+        axis.ticks.length=unit(-0.22, "cm"),
+        #设置刻度label的边距
+        axis.text.x = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm")), 
+        axis.text.y = element_text(margin=unit(c(0.5,0.5,0.5,0.5), "cm"))
+  )
+land_use
+
+
+writeRaster(merged_raster, filename = "path/to/save/merged_raster.tif", format = "GTiff") # 保存合并后的栅格文件
+
+#************************************************************************************************************************************************
+####Checking your landscape####
+#************************************************************************************************************************************************
+# import raster
+# for local file: rast("pathtoyourraster/raster.asc")
+# ... or any other raster file type, geotiff, ...
+
+
+citation("landscapemetrics")
