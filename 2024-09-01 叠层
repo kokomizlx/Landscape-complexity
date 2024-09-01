@@ -44,11 +44,12 @@ Legume_2010_H_plot <- ggplot() +
   ) +
   scale_fill_manual(
     values = c(
-      "lent_a" = "lightskyblue2", 
+   "lent_a" = "lightskyblue2", 
       "pige_a" = "lightsalmon", 
       "soyb_a" = "darkseagreen3",
       "cowp_a" = "indianred",
-      "chic_a" = "burlywood1"
+      "chic_a" = "burlywood1",
+      "NA" = NA
     ),
     name = 'Legume Type'  # Custom legend title
   ) + 
