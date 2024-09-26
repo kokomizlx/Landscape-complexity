@@ -1,6 +1,8 @@
 setwd("D:/5-onedrive data/OneDrive - 西湖大学/1_Project/2024/08-25 Landscape complexity")
 rm(list=ls())
 
+install.packages('spDataLarge', repos='https://nowosad.github.io/drat/', type='source')
+
 library(readxl)
 library(openxlsx)
 library(landscapemetrics)
@@ -13,6 +15,8 @@ library(sf)
 library(plotrix)
 library(data.table)
 library(dplyr)
+library(spData)
+library(spDataLarge)
 
 H_category_2020 <- read_excel("D:/5-onedrive data/OneDrive - 西湖大学/1_Project/2024/08-25 Landscape complexity/1_data/H_category_2020.xlsx")  # 替换为您的文件路径
 
@@ -26,7 +30,8 @@ H_category_2020 <- read_excel("D:/5-onedrive data/OneDrive - 西湖大学/1_Proj
 LC_2020 <- H_category_2020 %>%
   dplyr::select(x, y, double_tag)
 
-
+# 将 double_tag 列转换为整型
+LC_2020$double_tag <- as.integer(LC_2020$double_tag)
 
 # 设置数据的范围
 xmin <- -180
@@ -41,16 +46,27 @@ r <- raster(xmn = xmin, xmx = xmax, ymn = ymin, ymx = ymax, res = 0.05)
 LC_2020_raster <- rasterize(LC_2020[, c("x", "y")], r, LC_2020$double_tag, fun = mean)
 check_landscape(LC_2020_raster)
 plot(LC_2020_raster)
+check_landscape(projected_raster)
 
-# Web Mercator 是一种常用于在线地图（如 Google Maps 和 OpenStreetMap）的投影，单位为米，适合全球范围的应用。
-crs_web_mercator <- CRS("+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs")
-# 使用UTM（通用横轴墨卡托投影）
-utm_crs <- CRS("+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs")
+writeRaster(LC_2020_raster, filename = "3_output/1_tiff/LC_2020.tif", format = "GTiff") # 保存合并后的栅格文件
 
-# 投影转换(这个有问题)
-LC_2020_raster_2 <- projectRaster(LC_2020_raster, crs = utm_crs)
-plot(LC_2020_raster_2)
+###不同的投影
+# World Robinson投影
+wr = CRS("+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+LC_2020_raster_wr <- projectRaster(LC_2020_raster, crs = wr)
+# 将栅格数据转换为整数
+LC_2020_raster_wr_int <- round(LC_2020_raster_wr)  # 或者使用 as.integer()
 
-check_landscape(LC_2020_raster_2)
+# 查看不同的类别
+unique(values(LC_2020_raster_wr))
+plot(LC_2020_raster_wr_int)
+check_landscape(LC_2020_raster_wr_int)
 
-Legume_2010_H_raster_long <- projectRaster(Legume_2010_H_raster_long, crs = utm_crs)
+writeRaster(LC_2020_raster, filename = "3_output/1_tiff/LC_2020_raster_wr_int.tif", format = "GTiff") # 保存合并后的栅格文件
+
+#****************************************************************************************************
+# Using landscapemetrics
+# https://r-spatialecology.github.io/landscapemetrics/articles/get_started.html
+#****************************************************************************************************
+# Calculate e.g. perimeter of all patches
+lsm_p_perim(LC_2020_raster_wr_int)
