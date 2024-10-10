@@ -148,3 +148,46 @@ change_plot <- ggplot() +
   theme(legend.position = "bottom")
 
 print(change_plot)
+
+# 拿其他数据举例
+H2010_plot <- ggplot() +
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),
+    color = "white", fill = "lightgray", linewidth = 0.1
+  ) +
+  geom_tile(
+    data = H_category_2010,
+    aes(x, y, fill = double_tag),  # Use change for fill
+    alpha = 0.7,
+    color = NA  # No border color for tiles
+  ) +
+  scale_fill_gradient(
+    low = "#f7fcb9",  # Color for low values
+    high = "#005a32", # Color for high values
+    name = 'Number of category'  # Custom legend title
+  ) +                                                                                                                                                                                          
+  theme(legend.position = "bottom")
+
+print(H2010_plot)
+
+H2020_plot <- ggplot() +
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),
+    color = "white", fill = "lightgray", linewidth = 0.1
+  ) +
+  geom_tile(
+    data = H_category_2020,
+    aes(x, y, fill = double_tag),  # Use change for fill
+    alpha = 0.7,
+    color = NA  # No border color for tiles
+  ) +
+  scale_fill_gradient(
+    low = "#f7fcb9",  # Color for low values
+    high = "#005a32", # Color for high values
+    name = 'Number of category'  # Custom legend title
+  ) +                                                                                                                                                                                          
+  theme(legend.position = "bottom")
+
+print(H2020_plot)
